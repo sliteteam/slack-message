@@ -2,7 +2,7 @@ const { WebClient } = require("@slack/web-api");
 const core = require("@actions/core");
 
 // Replace this tag in raw JSONs with current time value (ready for slack `ts` values)
-const NOW_TS_TAG = "%NOW-TS%";
+const NOW_TS_TAG = "%NOW_TS%";
 
 async function run() {
   try {
