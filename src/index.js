@@ -92,6 +92,9 @@ async function run() {
       ),
     };
 
+    console.log(payload);
+    core.debug(JSON.stringify(payload, null, 2));
+
     const result = await client.chat.update(payload);
 
     if (result.error) {
