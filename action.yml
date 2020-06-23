@@ -1,5 +1,8 @@
 name: "Post or update slack message"
 description: "Send new or update a slack message from a bot"
+branding:
+  icon: "message-square"
+  color: "blue"
 inputs:
   token:
     description: "The slack bot token"
