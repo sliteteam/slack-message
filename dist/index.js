@@ -4055,45 +4055,45 @@ module.exports = require("util");
 /***/ 676:
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-const { WebClient } = __webpack_require__(114)
-const core = __webpack_require__(470)
+const { WebClient } = __webpack_require__(114);
+const core = __webpack_require__(470);
 
 // Replace this tag in raw JSONs with current time value (ready for slack `ts` values)
-const NOW_TS_TAG = '%NOW-TS%'
+const NOW_TS_TAG = "%NOW-TS%";
 
 async function run() {
   try {
-    const token = core.getInput('token', { required: true })
-    const channel = core.getInput('channel', { required: true })
-    const text = core.getInput('text', { required: false })
-    const blocksRaw = core.getInput('blocks', { required: false })
-    const attachmentsRaw = core.getInput('attachments', { required: false })
-    const ts = core.getInput('ts', { required: false })
-    const appendText = core.getInput('appendAttachments', { required: false })
-    const appendBlocksRaw = core.getInput('appendAttachments', {
+    const token = core.getInput("token", { required: true });
+    const channel = core.getInput("channel", { required: true });
+    const text = core.getInput("text", { required: false });
+    const blocksRaw = core.getInput("blocks", { required: false });
+    const attachmentsRaw = core.getInput("attachments", { required: false });
+    const ts = core.getInput("ts", { required: false });
+    const appendText = core.getInput("appendAttachments", { required: false });
+    const appendBlocksRaw = core.getInput("appendAttachments", {
       required: false,
-    })
-    const appendAttachmentsRaw = core.getInput('appendAttachments', {
+    });
+    const appendAttachmentsRaw = core.getInput("appendAttachments", {
       required: false,
-    })
+    });
 
     if (!token) {
-      throw new Error('Missing input `token`')
+      throw new Error("Missing input `token`");
     }
 
-    const client = new WebClient(token)
+    const client = new WebClient(token);
     const blocks = blocksRaw
       ? JSON.parse(blocksRaw.replace(NOW_TS_TAG, toSlackTS()))
-      : undefined
+      : undefined;
     const attachments = attachmentsRaw
       ? JSON.parse(attachmentsRaw.replace(NOW_TS_TAG, toSlackTS()))
-      : undefined
+      : undefined;
     const appendAttachments = appendAttachmentsRaw
       ? JSON.parse(appendAttachmentsRaw.replace(NOW_TS_TAG, toSlackTS()))
-      : undefined
+      : undefined;
     const appendBlocks = appendBlocksRaw
       ? JSON.parse(appendBlocksRaw.replace(NOW_TS_TAG, toSlackTS()))
-      : undefined
+      : undefined;
 
     if (!ts) {
       // just post a new message
@@ -4102,16 +4102,16 @@ async function run() {
         text,
         blocks,
         attachments,
-      }
-      const result = await client.chat.postMessage(message)
+      };
+      const result = await client.chat.postMessage(message);
       if (result.error) {
         throw new Error(
           `Error happendAttachments while posting slack message: ${result.error}`
-        )
+        );
       }
-      const { ts } = result
-      core.setOutput('ts', ts)
-      return
+      const { ts } = result;
+      core.setOutput("ts", ts);
+      return;
     }
 
     // retrive the original message
@@ -4121,9 +4121,9 @@ async function run() {
       latest: ts,
       inclusive: true,
       limit: 1,
-    })
+    });
 
-    const [message] = response.messages
+    const [message] = response.messages;
 
     const result = await client.chat.update({
       // required refs
@@ -4131,34 +4131,50 @@ async function run() {
       ts,
       // new attributes
       text: appendText
-        ? [message.text, appendText].filter(Boolean).join('')
+        ? [message.text, appendText].filter(Boolean).join("")
         : text || message.text,
-      blocks: appendBlocks
-        ? [...(message.blocks || []), ...appendBlocks].filter(Boolean)
-        : blocks || message.blocks,
-      attachments: appendAttachments
-        ? [...(message.attachments || []), ...appendAttachments].filter(Boolean)
-        : attachments || message.attachments,
-    })
+      blocks: mergeItems(message.blocks, blocks, appendBlocks),
+      attachments: mergeItems(
+        message.attachments,
+        attachments,
+        appendAttachments
+      ),
+    });
 
     if (result.error) {
       throw new Error(
         `Error happend while updating slack message: ${result.error}`
-      )
+      );
     }
-    core.setOutput('ts', ts)
+    core.setOutput("ts", ts);
   } catch (error) {
-    core.debug(error.message)
+    core.debug(error.message);
     core.setFailed(
       `Something went wrong while sending a message to slack: ${error.message}`
-    )
+    );
   }
 }
 
-run()
+run();
 
 function toSlackTS(timestamp = Date.now()) {
-  return `${Math.floor(timestamp / 1000)}`
+  return `${Math.floor(timestamp / 1000)}`;
+}
+
+function mergeItems(originalItems, newItems, appenedItems) {
+  if (!originalItems) {
+    return newItems || appenedItems;
+  }
+
+  if (!appenedItems) {
+    return newItems;
+  }
+
+  const items = [...originalItems, ...appenedItems];
+  if (!items.lenght) {
+    return undefined;
+  }
+  return items;
 }
 
 
