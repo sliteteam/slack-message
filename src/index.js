@@ -8,17 +8,27 @@ async function run() {
   try {
     const token = core.getInput("token", { required: true });
     const channel = core.getInput("channel", { required: true });
-    const text = core.getInput("text", { required: false });
-    const blocksRaw = core.getInput("blocks", { required: false });
-    const attachmentsRaw = core.getInput("attachments", { required: false });
     const ts = core.getInput("ts", { required: false });
-    const appendText = core.getInput("appendText", { required: false });
-    const appendBlocksRaw = core.getInput("appendBlocks", {
-      required: false,
-    });
-    const appendAttachmentsRaw = core.getInput("appendAttachments", {
-      required: false,
-    });
+
+    const text = core.getInput("text", { required: false }) || undefined;
+    const blocksRaw = core.getInput("blocks", { required: false }) || undefined;
+    const attachmentsRaw =
+      core.getInput("attachments", { required: false }) || undefined;
+    const appendText =
+      core.getInput("appendText", { required: false }) || undefined;
+    const appendBlocksRaw =
+      core.getInput("appendBlocks", {
+        required: false,
+      }) || undefined;
+    const appendAttachmentsRaw =
+      core.getInput("appendAttachments", {
+        required: false,
+      }) || undefined;
+
+    // const channel = "C8MNB4WHK";
+    // const ts = "1592921621.031800";
+    // const appendAttachmentsRaw =
+    //   '[{"color":"good","fields":[{"title":"Finished 👏","value":"Try it now on:\\n*Production*: https://slite.slite.com?rb=test-rb-3\\n*Staging*: https://slite.sliteapp.com?rb=test-rb-3"}],"ts":"%NOW_TS%"}]';
 
     if (!token) {
       throw new Error("Missing input `token`");
@@ -91,6 +101,8 @@ async function run() {
     }
     core.setOutput("ts", ts);
   } catch (error) {
+    console.log(JSON.stringify(error, null, 2));
+    console.error(error);
     core.debug(error.message);
     core.setFailed(
       `Something went wrong while sending a message to slack: ${error.message}`
