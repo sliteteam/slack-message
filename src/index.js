@@ -12,8 +12,8 @@ async function run() {
     const blocksRaw = core.getInput("blocks", { required: false });
     const attachmentsRaw = core.getInput("attachments", { required: false });
     const ts = core.getInput("ts", { required: false });
-    const appendText = core.getInput("appendAttachments", { required: false });
-    const appendBlocksRaw = core.getInput("appendAttachments", {
+    const appendText = core.getInput("appendText", { required: false });
+    const appendBlocksRaw = core.getInput("appendBlocks", {
       required: false,
     });
     const appendAttachmentsRaw = core.getInput("appendAttachments", {
@@ -48,9 +48,7 @@ async function run() {
       };
       const result = await client.chat.postMessage(message);
       if (result.error) {
-        throw new Error(
-          `Error happendAttachments while posting slack message: ${result.error}`
-        );
+        throw new Error(`Error while posting slack message: ${result.error}`);
       }
       const { ts } = result;
       core.setOutput("ts", ts);
@@ -68,7 +66,7 @@ async function run() {
 
     const [message] = response.messages;
 
-    const result = await client.chat.update({
+    const payload = {
       // required refs
       channel,
       ts,
@@ -82,7 +80,9 @@ async function run() {
         attachments,
         appendAttachments
       ),
-    });
+    };
+
+    const result = await client.chat.update(payload);
 
     if (result.error) {
       throw new Error(
@@ -114,7 +114,7 @@ function mergeItems(originalItems, newItems, appenedItems) {
   }
 
   const items = [...originalItems, ...appenedItems];
-  if (!items.lenght) {
+  if (!items.length) {
     return undefined;
   }
   return items;
