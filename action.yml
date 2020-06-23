@@ -1,0 +1,38 @@
+name: "Post or update slack message"
+description: "Send new or update a slack message from a bot"
+inputs:
+  token:
+    description: "The slack bot token"
+    required: true
+  channel:
+    description: "Send the message to this channel"
+    required: true
+  ts:
+    description: "If passed, update matching message instead of posting a new one"
+    required: false
+  text:
+    description: "The message's base text"
+    required: false
+  blocks:
+    description: "Optional array of blocks (JSON.stringify'ed)"
+    required: false
+  attachments:
+    description: "Optional array of attachements (JSON.stringify'ed)"
+    required: false
+  appendText:
+    description: "Append given text to original message (update only)"
+    required: false
+  appendBlocks:
+    description: "Append given blocks to original message (update only)"
+    required: false
+  appendAttachments:
+    description: "Append given attachments to original message (update only)"
+    required: false
+
+outputs:
+  ts:
+    description: "Updated or created message for later reference"
+
+runs:
+  using: "node12"
+  main: "dist/index.js"

@@ -1,0 +1,13 @@
+{
+  "name": "slack-message",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.js"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.1",
+    "@slack/web-api": "^5.10.0",
+    "@zeit/ncc": "^0.21.0"
+  }
+}
