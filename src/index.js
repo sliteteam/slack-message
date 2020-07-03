@@ -9,6 +9,7 @@ async function run() {
     const token = core.getInput("token", { required: true });
     const channel = core.getInput("channel", { required: true });
     const ts = core.getInput("ts", { required: false });
+    const threadTs = core.getInput("threadTs", { required: false });
 
     const text = core.getInput("text", { required: false }) || undefined;
     const blocksRaw = core.getInput("blocks", { required: false }) || undefined;
@@ -54,6 +55,26 @@ async function run() {
       const result = await client.chat.postMessage(message);
       if (result.error) {
         throw new Error(`Error while posting slack message: ${result.error}`);
+      }
+      const { ts } = result;
+      core.setOutput("ts", ts);
+      return;
+    }
+
+    if (threadTs) {
+      // just post a new message but as an thread
+      const message = {
+        channel,
+        text,
+        blocks,
+        attachments,
+        thread_ts: threadTs,
+      };
+      const result = await client.chat.postMessage(message);
+      if (result.error) {
+        throw new Error(
+          `Error while posting slack message as thread: ${result.error}`
+        );
       }
       const { ts } = result;
       core.setOutput("ts", ts);

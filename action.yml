@@ -13,6 +13,9 @@ inputs:
   ts:
     description: "If passed, update matching message instead of posting a new one"
     required: false
+  threadTs:
+    description: "If passed, add message to thread to the message referenced"
+    required: false
   text:
     description: "The message's base text"
     required: false
