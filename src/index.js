@@ -10,7 +10,6 @@ async function run() {
     const channel = core.getInput("channel", { required: true });
     const ts = core.getInput("ts", { required: false });
     const threadTs = core.getInput("threadTs", { required: false });
-
     const text = core.getInput("text", { required: false }) || undefined;
     const blocksRaw = core.getInput("blocks", { required: false }) || undefined;
     const attachmentsRaw =
@@ -44,80 +43,61 @@ async function run() {
       ? JSON.parse(appendBlocksRaw.replace(NOW_TS_TAG, toSlackTS()))
       : undefined;
 
-    if (!ts) {
-      // just post a new message
-      const message = {
+    if (ts) {
+      // retrive the original message
+      const response = await client.conversations.history({
+        token,
         channel,
-        text,
-        blocks,
-        attachments,
-      };
-      const result = await client.chat.postMessage(message);
-      if (result.error) {
-        throw new Error(`Error while posting slack message: ${result.error}`);
-      }
-      const { ts } = result;
-      core.setOutput("ts", ts);
-      return;
-    }
+        latest: ts,
+        inclusive: true,
+        limit: 1,
+      });
 
-    if (threadTs) {
-      // just post a new message but as an thread
-      const message = {
+      const [message] = response.messages;
+
+      const payload = {
+        // required refs
         channel,
-        text,
-        blocks,
-        attachments,
-        thread_ts: threadTs,
+        ts,
+        // new attributes
+        text: appendText
+          ? [message.text, appendText].filter(Boolean).join("")
+          : text || message.text,
+        blocks: mergeItems(message.blocks, blocks, appendBlocks),
+        attachments: mergeItems(
+          message.attachments,
+          attachments,
+          appendAttachments
+        ),
       };
-      const result = await client.chat.postMessage(message);
+
+      core.debug(JSON.stringify(payload, null, 2));
+
+      const result = await client.chat.update(payload);
+
       if (result.error) {
         throw new Error(
-          `Error while posting slack message as thread: ${result.error}`
+          `Error happend while updating slack message: ${result.error}`
         );
       }
-      const { ts } = result;
       core.setOutput("ts", ts);
       return;
     }
 
-    // retrive the original message
-    const response = await client.conversations.history({
-      token,
+    // just post a new message
+    const message = {
       channel,
-      latest: ts,
-      inclusive: true,
-      limit: 1,
-    });
-
-    const [message] = response.messages;
-
-    const payload = {
-      // required refs
-      channel,
-      ts,
-      // new attributes
-      text: appendText
-        ? [message.text, appendText].filter(Boolean).join("")
-        : text || message.text,
-      blocks: mergeItems(message.blocks, blocks, appendBlocks),
-      attachments: mergeItems(
-        message.attachments,
-        attachments,
-        appendAttachments
-      ),
+      text,
+      blocks,
+      attachments,
+      thread_ts: threadTs,
     };
-
-    core.debug(JSON.stringify(payload, null, 2));
-
-    const result = await client.chat.update(payload);
-
+    const result = await client.chat.postMessage(message);
     if (result.error) {
-      throw new Error(
-        `Error happend while updating slack message: ${result.error}`
-      );
+      throw new Error(`Error while posting slack message: ${result.error}`);
     }
-    core.setOutput("ts", ts);
+    const { ts: responseTs } = result;
+    core.setOutput("ts", responseTs);
   } catch (error) {
     core.debug(error.message);
     core.setFailed(
