@@ -77,7 +77,7 @@ async function run() {
 
       if (result.error) {
         throw new Error(
-          `Error happend while updating slack message: ${result.error}`
+          `Error happend while updating slack message: ${result}`
         );
       }
       core.setOutput("ts", ts);
@@ -94,7 +94,7 @@ async function run() {
     };
     const result = await client.chat.postMessage(message);
     if (result.error) {
-      throw new Error(`Error while posting slack message: ${result.error}`);
+      throw new Error(`Error while posting slack message: ${result}`);
     }
     const { ts: responseTs } = result;
     core.setOutput("ts", responseTs);
