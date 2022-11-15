@@ -40,5 +40,5 @@ outputs:
     description: "Updated or created message for later reference"
 
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"
