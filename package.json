@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.1",
-    "@slack/web-api": "^5.10.0",
+    "@slack/web-api": "^5.15.0",
     "@zeit/ncc": "^0.21.0"
   }
 }
